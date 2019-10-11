@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+import "google/api/annotations.proto";
+package grpcserver;
+option go_package = "/internal/grpcserver";
+
+// Событие
+message Event {
+    int64 id = 1; // уникальный идентификатор события
+    string title = 2; // Заголовок - короткий текст
+    google.protobuf.Timestamp date = 3; // Дата и время события
+    google.protobuf.Duration duration = 4; // Длительность события
+    string author = 5; // Пользователь, владелец события
+    string description = 6; // Описание события - длинный текст, опционально
+    google.protobuf.Duration notify = 7; // За сколько времени высылать уведомление, опционально
+    bool reminded = 8; // Было напоминание или нет
+}
+
+// Уведомление
+message Notify {
+    string title = 1; // Заголовок события
+    google.protobuf.Timestamp date = 2; // Дата события
+    string user = 3; // Пользователь, которому отправлять
+}
+
+// Ответ с одним событием
+message EventResponse {
+    bool status = 1;
+    Event event = 2;
+    string detail = 3; // Комментарий  
+}
+
+// Ответ с масивом событий 
+message EventsResponse {
+    bool status = 1;
+    repeated Event events = 2;
+    string detail = 3; // Комментарий  
+}
+// Запрос на удаление события
+message EventIDRequest {
+    int64 id = 1; // уникальный идентификатор события
+}
+
+message StatusResponse {
+    bool status = 1;
+    string detail = 2; //
+}
+enum Periods {
+    DAY = 0;
+    WEEK = 1;
+    MONTH = 2;
+}
+message PeriodRequest {
+    Periods period = 1;
+    google.protobuf.Timestamp date = 2; // Дата и время события
+}
+
+// Grpc сервис календаря
+service Calendar {
+    // Создание события
+    rpc CreateEvent (Event) returns (EventResponse) {
+        option (google.api.http) = {
+        post: "/v1/events"
+        body: "*"
+      };
+    }
+    // Обновление события
+    rpc UpdateEvent (Event) returns (StatusResponse) {
+        option (google.api.http) = {
+        post: "/v1/event/{id}"
+        body: "*"
+      };
+    }
+    // Удаление события 
+    rpc DeleteEvent (EventIDRequest) returns (StatusResponse) {
+        option (google.api.http).delete = "/v1/event/{id}";
+    }
+    // Список событий
+    rpc GetEvents (PeriodRequest) returns (EventsResponse) {
+        option (google.api.http).get = "/v1/events/{period}/{date}";
+    }
+
+    // Событие
+    rpc GetEvent (EventIDRequest) returns (EventResponse) {
+        option (google.api.http).get = "/v1/event/{id}";
+    }
+}

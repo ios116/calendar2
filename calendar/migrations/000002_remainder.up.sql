@@ -1,0 +1,1 @@
+ALTER TABLE events ADD COLUMN reminded boolean NOT NULL DEFAULT FALSE;

@@ -1,0 +1,1 @@
+mockgen  -destination=./internal/calendar/mock_repo.go  -package=calendar -source=./internal/domain/claendar_domain.go EventRepository
