@@ -36,6 +36,20 @@ services:
       - net
     restart: on-failure
 
+  integration_tests:
+    build: ./integration_tests
+    environment:
+      GRPC_PORT: 50051
+      GRPC_HOST: calendar.ru
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: 123456
+    command: "true"
+    depends_on:
+      - db
+      - migrations
+    networks:
+      - net
+
   sender:
     build: ./calendar
     command: ./main sender
@@ -118,3 +132,5 @@ volumes:
 networks:
   net:
     driver: bridge
+
+
