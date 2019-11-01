@@ -69,6 +69,18 @@ services:
       - net
     restart: on-failure
 
+  prom:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command: --config.file=/etc/prometheus/prometheus.yml
+    networks:
+      - net
+    #network_mode: "host"
+
   rest:
     build: ./calendar
     command: ./main web
@@ -88,6 +100,7 @@ services:
 
   calendar.ru:
     build: ./calendar
+    container_name: calendar
     environment:
       GRPC_PORT: 50051
       GRPC_HOST: 0.0.0.0
